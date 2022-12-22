@@ -21,7 +21,7 @@ install the requirements:
 pip install -r requirements.txt
 ```
 
-Copy the `ramsay.conf.template` to `ramsay.conf` and fill in the information. Start the bot:
+Copy the `ramsay.conf.template` to `ramsay.conf` and fill in the information. To get the correct channel id, you can just right click the desired channel in discord and hit `Copy ID`. Start the bot:
 ```
 python main.py
 ```
