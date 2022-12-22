@@ -1,9 +1,10 @@
 # copy this template to ramsay.conf and fill in the required information
 [DISCORD BOT]
-token =
+token = 
 # space separated list of prefix for the bot
-prefix = j. J.
+prefix = r. R.
 # paste the name of the team you want to follow here
-teamname = Überkochen
+teamname = 
 dataurl = https://overcooked.greeny.dev/assets/data/data.csv
+# id of the channel the bot should post updates in
 channelid = 

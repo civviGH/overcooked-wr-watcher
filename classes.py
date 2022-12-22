@@ -48,8 +48,7 @@ class Level:
         return self.game == other.game and self.dlc == other.dlc and self.level == other.level
 
     def __str__(self):
-        entry_count = len(self._entries)
-        return f"{self.game} {self.dlc} {self.level} with {entry_count} entries."
+        return f"{self.game} - {self.dlc} - {self.level}"
 
     def slug(self):
         return slugify(f"{self.game} {self.dlc} {self.level}")
@@ -81,7 +80,10 @@ class DataPoint:
         placed_levels = [l for l in self._levels if l.has_team_entry(self._team_name)]
         self._levels_with_placements = {}
         for pl in placed_levels:
-            self._levels_with_placements[pl.slug()] = pl.get_team_placement(self._team_name)
+            self._levels_with_placements[pl.slug()] = {
+                'placement' : pl.get_team_placement(self._team_name),
+                'level' : pl
+            }
 
     def get_placement_dict(self):
         return self._levels_with_placements
@@ -91,19 +93,53 @@ class DataPoint:
         # possible cases:
         # 1 complete new level not in list
         # 2 placement within a level changed
-        for level_slug, placement in other_dp.get_placement_dict().items():
+        for level_slug, info in other_dp.get_placement_dict().items():
             if level_slug not in self._levels_with_placements:
-                out_msg.append(f"new record found on {level_slug} placed {placement}")
+                out_msg.append(self.create_new_record_message(info))
                 continue
-            old_placement = self._levels_with_placements[level_slug]
+            placement = info['placement']
+            old_placement = self._levels_with_placements[level_slug]['placement']
             if old_placement != placement:
-                out_msg.append(f"placement in level {level_slug} changed from {old_placement} to {placement}")
+                out_msg.append(self.create_placement_change_message(info, old_placement))
         if len(out_msg) == 0:
             return None
         return out_msg
 
     def get_report(self):
         out_msg = []
-        for level_slug, placement in self._levels_with_placements.items():
-            out_msg.append(f"new record found on {level_slug} placed {placement}")
+        for _, info in self._levels_with_placements.items():
+            out_msg.append(self.create_new_record_message(info))
         return out_msg
+
+    def create_new_record_message(self, info):
+        # boilerplate for URL
+        game_slug = slugify(info['level'].game)
+        if game_slug == "all-you-can-eat":
+            game = "ayce"
+        else:
+            game = game_slug
+        dlc = slugify(info['level'].dlc)
+        stage = slugify(info['level'].level)
+        url = f"https://overcooked.greeny.dev/{game}/{dlc}/{stage}"
+
+        placement = info['placement']
+        msg = f"New record for Team {self._team_name} on {info['level']}, placing {placement} \n{url}"
+
+        return msg
+
+    # this seems quite redundant with ^ 
+    def create_placement_change_message(self, info, old_placement):
+        # boilerplate for URL
+        game_slug = slugify(info['level'].game)
+        if game_slug == "all-you-can-eat":
+            game = "ayce"
+        else:
+            game = game_slug
+        dlc = slugify(info['level'].dlc)
+        stage = slugify(info['level'].level)
+        url = f"https://overcooked.greeny.dev/{game}/{dlc}/{stage}"
+
+        placement = info['placement']
+        msg = f"Placement changed for Team {self._team_name} on {info['level']} from {old_placement} to {placement} \n{url}"
+
+        return msg
